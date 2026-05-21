@@ -111,8 +111,10 @@ public class NamingGrpcRedoService implements ConnectionEventListener {
      * @param instance    registered instance
      */
     public void cacheInstanceForRedo(String serviceName, String groupName, Instance instance) {
+        // key会放入字符串常量池
         String key = NamingUtils.getGroupedName(serviceName, groupName);
         InstanceRedoData redoData = InstanceRedoData.build(serviceName, groupName, instance);
+        // 放入map缓存
         synchronized (registeredInstances) {
             registeredInstances.put(key, redoData);
         }
@@ -134,7 +136,7 @@ public class NamingGrpcRedoService implements ConnectionEventListener {
     }
     
     /**
-     * Instance register successfully, mark registered status as {@code true}.
+     * 实例注册成功，标记注册状态为{@code true}。
      *
      * @param serviceName service name
      * @param groupName   group name

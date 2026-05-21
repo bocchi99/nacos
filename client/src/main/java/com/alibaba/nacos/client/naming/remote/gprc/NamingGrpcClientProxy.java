@@ -139,7 +139,7 @@ public class NamingGrpcClientProxy extends AbstractNamingClientProxy {
     public void registerService(String serviceName, String groupName, Instance instance) throws NacosException {
         NAMING_LOGGER.info("[REGISTER-SERVICE] {} registering service {} with instance {}", namespaceId, serviceName,
                 instance);
-        if (instance.isEphemeral()) {
+        if (instance.isEphemeral()) {// 临时实例
             registerServiceForEphemeral(serviceName, groupName, instance);
         } else {
             doRegisterServiceForPersistent(serviceName, groupName, instance);
@@ -148,6 +148,7 @@ public class NamingGrpcClientProxy extends AbstractNamingClientProxy {
     
     private void registerServiceForEphemeral(String serviceName, String groupName, Instance instance)
             throws NacosException {
+        // 缓存实例
         redoService.cacheInstanceForRedo(serviceName, groupName, instance);
         doRegisterService(serviceName, groupName, instance);
     }
@@ -254,6 +255,7 @@ public class NamingGrpcClientProxy extends AbstractNamingClientProxy {
     public void doRegisterService(String serviceName, String groupName, Instance instance) throws NacosException {
         InstanceRequest request = new InstanceRequest(namespaceId, serviceName, groupName,
                 NamingRemoteConstants.REGISTER_INSTANCE, instance);
+        // 发起注册请求**（核心注册请求逻辑）
         requestToServer(request, Response.class);
         redoService.instanceRegistered(serviceName, groupName);
     }
@@ -453,7 +455,7 @@ public class NamingGrpcClientProxy extends AbstractNamingClientProxy {
                     getSecurityHeaders(request.getNamespace(), request.getGroupName(), request.getServiceName()));
             response = requestTimeout < 0 ? rpcClient.request(request) : rpcClient.request(request, requestTimeout);
             if (ResponseCode.SUCCESS.getCode() != response.getResultCode()) {
-                // If the 403 login operation is triggered, refresh the accessToken of the client
+               // 如果触发了403登录操作，刷新客户端的访问令牌
                 if (NacosException.NO_RIGHT == response.getErrorCode()) {
                     reLogin();
                 }

@@ -274,7 +274,7 @@ public class MetricsMonitor {
             BatchInstancePublishInfo instancePublishInfo) {
         int newSize = instancePublishInfo.getInstancePublishInfos().size();
         if (null == old) {
-            // First time increment batchPublishInfo, add all into metrics.
+           // 第一次增量batchPublishInfo
             getIpCountMonitor().addAndGet(newSize);
         } else if (old instanceof BatchInstancePublishInfo) {
             // Not first time increment batchPublishInfo, calculate the diff, and add the diff to metrics, the diff may be negative.

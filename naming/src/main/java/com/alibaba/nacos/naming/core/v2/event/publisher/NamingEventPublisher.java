@@ -96,9 +96,11 @@ public class NamingEventPublisher extends Thread implements ShardedEventPublishe
     @Override
     public boolean publish(Event event) {
         checkIsStart();
+        // 优先放入队列，异步处理
         boolean success = this.queue.offer(event);
         if (!success) {
             Loggers.EVT_LOG.warn("Unable to plug in due to interruption, synchronize sending time, event : {}", event);
+            // 加入队列失败，直接同步处理，通知订阅者进行处理
             handleEvent(event);
         }
         return true;

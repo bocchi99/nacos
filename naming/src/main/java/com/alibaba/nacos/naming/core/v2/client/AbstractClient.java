@@ -68,16 +68,35 @@ public abstract class AbstractClient implements Client {
         return lastUpdatedTime;
     }
     
+    /**
+     * 向客户端添加服务实例信息。
+     *
+     * <p>该方法会将服务实例发布信息保存到客户端的发布器映射中，并根据实例类型进行不同的处理：
+     * <ul>
+     *   <li>如果是批量实例发布信息，则更新批量注册的IP计数监控</li>
+     *   <li>如果是普通实例发布信息且为新添加的服务，则增加实例计数监控</li>
+     * </ul>
+     *
+     * <p>添加完成后会发布客户端变更事件并记录日志。
+     *
+     * @param service 服务对象，包含服务的命名空间、分组和服务名称等信息
+     * @param instancePublishInfo 实例发布信息，包含实例的IP、端口等元数据
+     * @return 始终返回true，表示添加成功
+     */
     @Override
     public boolean addServiceInstance(Service service, InstancePublishInfo instancePublishInfo) {
+        // 处理批量实例注册的情况
         if (instancePublishInfo instanceof BatchInstancePublishInfo) {
             InstancePublishInfo old = publishers.put(service, instancePublishInfo);
             MetricsMonitor.incrementIpCountWithBatchRegister(old, (BatchInstancePublishInfo) instancePublishInfo);
         } else {
+            // 处理普通实例注册的情况，仅在新增服务时更新监控计数
             if (null == publishers.put(service, instancePublishInfo)) {
+                // AtomicInteger 加1
                 MetricsMonitor.incrementInstanceCount();
             }
         }
+        // 发布客户端变更事件
         NotifyCenter.publishEvent(new ClientEvent.ClientChangedEvent(this));
         Loggers.SRV_LOG.info("Client change for service {}, {}", service, getClientId());
         return true;

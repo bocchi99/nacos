@@ -32,6 +32,7 @@ import java.util.Objects;
  *
  * @author nkorange
  */
+// json序列化的时候忽略为null的字段
 @JsonInclude(Include.NON_NULL)
 public class Instance implements Serializable {
     
@@ -64,12 +65,13 @@ public class Instance implements Serializable {
     
     /**
      * If instance is enabled to accept request.
+     * 是否接受请求
      */
     private boolean enabled = true;
     
     /**
      * If instance is ephemeral.
-     *
+     * 是否临时实例
      * @since 1.0.0
      */
     private boolean ephemeral = true;
@@ -86,6 +88,7 @@ public class Instance implements Serializable {
     
     /**
      * user extended attributes.
+     * 元数据
      */
     private Map<String, String> metadata = new HashMap<>();
     
@@ -212,17 +215,26 @@ public class Instance implements Serializable {
     private static boolean strEquals(final String str1, final String str2) {
         return Objects.equals(str1, str2);
     }
-    
+    /**
+     *  心跳检查频率，默认5s
+     * @return
+     */
     public long getInstanceHeartBeatInterval() {
         return getMetaDataByKeyWithDefault(PreservedMetadataKeys.HEART_BEAT_INTERVAL,
                 Constants.DEFAULT_HEART_BEAT_INTERVAL);
     }
-    
+    /**
+     * 心跳超时时间，默认15s
+     * @return
+     */
     public long getInstanceHeartBeatTimeOut() {
         return getMetaDataByKeyWithDefault(PreservedMetadataKeys.HEART_BEAT_TIMEOUT,
                 Constants.DEFAULT_HEART_BEAT_TIMEOUT);
     }
-    
+    /**
+     *
+     * @return
+     */
     public long getIpDeleteTimeout() {
         return getMetaDataByKeyWithDefault(PreservedMetadataKeys.IP_DELETE_TIMEOUT,
                 Constants.DEFAULT_IP_DELETE_TIMEOUT);

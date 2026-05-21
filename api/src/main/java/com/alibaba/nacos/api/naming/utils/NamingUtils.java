@@ -64,6 +64,7 @@ public class NamingUtils {
             throw new IllegalArgumentException("Param 'groupName' is illegal, groupName is blank");
         }
         final String resultGroupedName = groupName + Constants.SERVICE_INFO_SPLITER + serviceName;
+        // String.intern(): 将groupName@@serviceName 放入JVM常量字符串
         return resultGroupedName.intern();
     }
     

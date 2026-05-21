@@ -126,7 +126,12 @@ public class ClientServiceIndexesManager extends SmartSubscriber {
             removeSubscriberIndexes(service, clientId);
         }
     }
-    
+
+    /**
+     * 建立Service与发布Client的关系
+     * @param service
+     * @param clientId
+     */
     private void addPublisherIndexes(Service service, String clientId) {
         publisherIndexes.computeIfAbsent(service, key -> new ConcurrentHashSet<>()).add(clientId);
         NotifyCenter.publishEvent(new ServiceEvent.ServiceChangedEvent(service, true));

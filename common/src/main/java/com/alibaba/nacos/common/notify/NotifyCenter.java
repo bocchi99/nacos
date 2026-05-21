@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.alibaba.nacos.api.exception.NacosException.SERVER_ERROR;
 
 /**
- * Unified Event Notify Center.
+ * 统一事件通知中心。
  *
  * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
  * @author zongtanghu
@@ -270,7 +270,7 @@ public class NotifyCenter {
     /**
      * Request publisher publish event Publishers load lazily, calling publisher. Start () only when the event is
      * actually published.
-     *
+     * final修饰入参表示一种设计意图:该变量不会被修改;会控制变量本身引用不可改变，但是内部变量不受控制
      * @param event class Instances of the event.
      */
     public static boolean publishEvent(final Event event) {
@@ -283,20 +283,32 @@ public class NotifyCenter {
     }
     
     /**
-     * Request publisher publish event Publishers load lazily, calling publisher.
+     * 发布事件到对应的发布者。
      *
-     * @param eventType class Instances type of the event type.
-     * @param event     event instance.
+     * <p>该方法根据事件类型选择合适的事件发布者进行发布：
+     * <ul>
+     *   <li>如果是慢事件（SlowEvent），使用共享发布者处理</li>
+     *   <li>如果是普通事件，从发布者映射表中查找对应的发布者进行发布</li>
+     *   <li>如果找不到发布者且是插件事件，静默返回成功</li>
+     *   <li>如果找不到发布者且不是插件事件，记录警告日志并返回失败</li>
+     * </ul>
+     *
+     * @param eventType 事件类型的Class对象，用于确定事件的分类和路由
+     * @param event     具体的事件实例，包含需要传递的数据和信息
+     * @return 事件发布成功返回true；未找到对应发布者且非插件事件时返回false
      */
     private static boolean publishEvent(final Class<? extends Event> eventType, final Event event) {
+        // 判断是否为慢事件，使用共享发布者处理
         if (ClassUtils.isAssignableFrom(SlowEvent.class, eventType)) {
             return INSTANCE.sharePublisher.publish(event);
         }
-        
+        // 使用Event类名作为topic
         final String topic = ClassUtils.getCanonicalName(eventType);
         
+        // 从映射表中查找对应主题的发布者
         EventPublisher publisher = INSTANCE.publisherMap.get(topic);
         if (publisher != null) {
+            // 发布事件
             return publisher.publish(event);
         }
         if (event.isPluginEvent()) {

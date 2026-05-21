@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public enum AbilityKey {
 
     /**
+     * 服务器支持通过 grpc 注册或注销持久实例
      * Server support register or deregister persistent instance by grpc.
      */
     SERVER_SUPPORT_PERSISTENT_INSTANCE_BY_GRPC("supportPersistentInstanceByGrpc",
